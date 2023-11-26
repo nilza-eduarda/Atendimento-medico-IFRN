@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: Atendimento Médico API
+  version: 1.0.0
+servers:
+  - url: http://{host}:{porta}/api
+    variables:
+      host:
+        default: localhost
+      porta:
+        default: '8000'
+
+paths:
+  /usuarios:
+    get:
+      summary: Listar todos os usuários
+      responses:
+        '200':
+          description: Lista de usuários cadastrados
+          content:
+            application/json:
+              example:
+                - cpf: 000.000.000-01
+                  nome: Carlos Sérgio Batalha Filho
+                  data_nasc: 01/01/1990
+                  tipo: admin
+                - cpf: 000.000.000-02
+                  nome: Gabriel Victor de Souza Fernandes
+                  data_nasc: 02/02/1995
+                  tipo: comum
+
+    post:
+      summary: Cadastrar usuário
+      requestBody:
+        content:
+          application/json:
+           schema:
+              type: object
+              properties:
+                cpf:
+                  type: string
+                nome:
+                  type: string
+                data_nasc:
+                  type: string
+                tipo:
+                  type: string
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+        '400':
+          description: Parâmetros faltando ou inválidos
+
+  /usuarios/{cpf}:
+    get:
+      summary: Obter dados de um usuário pelo CPF
+      parameters:
+        - in: path
+          name: cpf
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dados do usuário encontrados
+          content:
+            application/json:
+              example:
+                cpf: 000.000.000-01
+                nome: Carlos Sérgio Batalha Filho
+                data_nasc: 01/01/1990
+                tipo: admin
+        '404':
+          description: Usuário não encontrado
+
+    put:
+      summary: Alterar dados de um usuário pelo CPF
+      parameters:
+        - in: path
+          name: cpf
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cpf:
+                  type: string
+                nome:
+                  type: string
+                data_nasc:
+                  type: string
+                tipo:
+                  type: string
+      responses:
+        '200':
+          description: Dados do usuário alterados com sucesso
+        '403':
+          description: Usuário não tem permissão para fazer a alteração
+        '404':
+          description: Usuário não encontrado
+
+    delete:
+      summary: Apagar um usuário pelo CPF
+      parameters:
+        - in: path
+          name: cpf
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Usuário apagado com sucesso
+        '403':
+          description: Usuário não tem permissão para apagar
+        '404':
+          description: Usuário não encontrado
