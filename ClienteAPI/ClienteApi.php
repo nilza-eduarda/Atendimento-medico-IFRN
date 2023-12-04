@@ -2,11 +2,12 @@
 
 require 'requisicoes.php';
 
-// $resp = enviar_requisicao("$url_api/usuarios");
+$resp = enviar_requisicao("$url_api/usuarios");
 
-// var_dump($resp['codigo'], $resp['corpo']);
+var_dump($resp['codigo'], $resp['corpo']);
 
-while(true){
+
+while (true) {
     echo "---------- Atendimento Medico -----------\n";
     echo "Escolha o que fazer:\n";
     echo "1 - Listar usuários\n";
@@ -19,20 +20,33 @@ while(true){
 
     $array = array(
         "cpf" => "",
-        "nome"=> "",
-        "data_nasc"=> "",
-        "tipo"=> ""
-      );
+        "nome" => "",
+        "data_nasc" => "",
+        "tipo" => ""
+    );
 
-    if($x == "1"){
-    
+    if ($x == "1") {
         $resp = enviar_requisicao("$url_api/usuarios");
-        $resp_json = json_decode($resp['corpo'], true);
-        foreach($resp_json['resultado'] as $item){
-            echo $item['nome']."- ". $item['cpf']."\n";
-        }
     
-    }elseif($x == "2"){
+        if ($resp['codigo'] == 200) {
+            $resp_json = json_decode($resp['corpo'], true);
+    
+            if ($resp_json === null) {
+                echo "Erro ao decodificar JSON:\n";
+                var_dump($resp['corpo']);
+            } elseif (isset($resp_json['resultado']) && is_array($resp_json['resultado'])) {
+                foreach ($resp_json['resultado'] as $item) {
+                    echo $item['nome'] . "- " . $item['cpf'] . "\n";
+                }
+            } else {
+                echo "Resposta da API não contém dados esperados:\n";
+                var_dump($resp_json);
+            }
+        } else {
+            echo "Erro na requisição (código {$resp['codigo']}): " . $resp['corpo'] . "\n";
+        }
+        
+    }elseif ($x == "2") {
 
         echo "digite seu nome\n";
         $nome = readline();
