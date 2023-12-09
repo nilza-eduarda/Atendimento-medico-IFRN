@@ -41,6 +41,9 @@ paths:
   /usuarios/{cpf}:
     get:
       summary: Obter dados de um usuário pelo CPF
+      security:
+        - bearer: []
+      
       parameters:
         - in: path
           name: cpf
@@ -62,6 +65,9 @@ paths:
 
     put:
       summary: Alterar dados de um usuário pelo CPF
+      security:
+        - bearer: []
+      
       parameters:
         - in: path
           name: cpf
@@ -86,6 +92,9 @@ paths:
 
     delete:
       summary: Apagar um usuário pelo CPF
+      security:
+        - bearer: []
+      
       parameters:
         - in: path
           name: cpf
@@ -155,3 +164,10 @@ paths:
           description: Consulta apagada com sucesso
         '403':
           description: Usuário não tem permissão para apagar
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 

@@ -1,10 +1,12 @@
 <?php
 
-require 'requisicoes.php';
+use GuzzleHttp\Client as GuzzleCliente;
 
-$resp = enviar_requisicao("$url_api/usuarios");
+require 'vendor/autoload.php';
 
-var_dump($resp['codigo'], $resp['corpo']);
+$cliente_API = new GuzzleCliente ([
+    'base_uri' => "localhost: 8000"
+]);
 
 
 while (true) {
@@ -74,9 +76,13 @@ while (true) {
             echo "digite o cpf: \n";
             $cpf = readline();
 
-            $resp = enviar_requisicao("$url_api/usuarios/{$cpf}");
+            $resp = $cliente_API->get("$url_api/usuarios/{$cpf}", [
+                'headers' => ['Authorization' => "Bearer $this->suap_token"],
+                'json' => $form
+            ]);
+
             if($resp['codigo'] == "200"){
-                $resp_json = json_decode($resp['corpo'], true);
+                $resp_json = json_decode($resp->getBody(), true);
             
                 foreach($resp_json['resultado'] as $key => $value){
                     echo $key."- ". $value."\n";
@@ -92,7 +98,10 @@ while (true) {
         echo "---- DELETAR UM USUÁRIO ----\n";
         echo "digite o cpf: \n";
         $cpf = readline();
-        $resp = enviar_requisicao("$url_api/usuarios/{$cpf}", metodo:"HEAD");
+        $resp = $cliente_API->delete("$url_api/usuarios/{$cpf}", [
+            'headers' => ['Authorization' => "Bearer $this->suap_token"],
+            'json' => $form
+        ]);
 
         if($resp['codigo'] == "200"){
         $resp = enviar_requisicao("$url_api/usuarios/{$cpf}", metodo:"DELETE");
@@ -104,7 +113,10 @@ while (true) {
         
         echo "digite seu cpf\n";
         $cpfid = readline();
-        $resp = enviar_requisicao("$url_api/usuarios/{$cpfid}", metodo: 'HEAD');
+        $resp = $cliente_API->put("$url_api/usuarios/{$cpf}", [
+            'headers' => ['Authorization' => "Bearer $this->suap_token"],
+            'json' => $form
+        ]);
 
         if($resp['codigo'] == "200"){
             echo "digite seu nome\n";
@@ -121,11 +133,10 @@ while (true) {
             $array['data_nasc'] = $data_nasc;   
             $array['tipo'] = $tipo;   
             
-            $resp = enviar_requisicao("$url_api/usuarios/{$cpfid}", 
-            metodo: 'PUT',
-            corpo: json_encode($array),
-            cabecalhos: ['Content-type:application/json']
-            );
+            $resp = $cliente_API->put("$url_api/usuarios/{$cpf}", [
+                'headers' => ['Authorization' => "Bearer $this->suap_token"],
+                'json' => $form
+            ]);
             
             echo "Usuário Editado com sucesso!!\n";
         }else{

@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
+
+class VerificarTokenSuap
+{
+    /**
+     * Verifica se tem um token SUAP válido na seção.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        $suap_token = $request->bearerToken();
+
+        if (empty($suap_token)) {
+            return response()->json([
+                'tipo' => 'erro',
+                'conteudo' => 'Não autorizado'
+            ], 401);
+        }
+
+        $dados_SUAP = null;
+        if (Cache::has($suap_token)) {
+            $dados_SUAP = Cache::get($suap_token);
+        } else {
+            $resp = Http::withToken($suap_token)
+                ->accepJson()
+                ->get('https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/')
+                ->getBody()->getContents();
+            
+            $json = json_decode(
+                $resp,
+                associative: true,
+                flags: JSON_THROW_ON_ERROR
+            );
+
+            $dados_SUAP = [
+                'nome' => $json['nome'],
+                'matricula' => $json['matricula']
+            ];
+
+            Cache::set($suap_token, $dados_SUAP);
+        }
+        $request->attributes->set('usuario', $dados_SUAP);
+        return $next($request);
+    }
+
+    /**
+     * Pega os dados do usuário no SUAP.
+     * 
+     * @param string $suap_token Token JWT gerado pelo SUAP no URI
+     * https://suap.ifrn.edu.br/api/v2/autenticacao/token/.
+     * 
+     * @return array Os dados do usuário no SUAP.
+     */
+    private function getDadosUsuarioSUAP($suap_token): array {
+        $res = json_decode(
+            Http::withToken($suap_token)
+                ->acceptJson()
+                ->get('https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/')
+                ->getBody()->getContents(),
+            associative: true
+        );
+
+        $dados = [
+            'nome' => $res['nome_usual'],
+            'matricula' => $res['matricula']
+            # Poderia retornar mais dados aqui
+        ];
+
+        return $dados;
+    }
+}
