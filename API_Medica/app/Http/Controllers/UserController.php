@@ -50,8 +50,6 @@ class UserController extends Controller
      */
     public function update(Request $request, string $cpf)
     {
-        //Aqui ficaria a verificação se o usuário está logado (para poder realizar essa ação)
-        $user = User::where('email', $request->email)->first();
         $usuario = User::where('cpf', $cpf)->first();
         if (!$usuario) {
             return response()->json(['mensagem' => 'Usuário não encontrado'], 404);
@@ -66,6 +64,8 @@ class UserController extends Controller
     public function destroy(string $cpf)
     {
         //Aqui ficaria a verificação se o usuário está logado (para poder realizar essa ação)
+        
+        Log::info("Token salvo no controller: ".$suap_token);
         $usuario = User::where('cpf', $cpf)->first();
         if (!$usuario) {
             return response()->json(['mensagem' => 'Usuário não encontrado'], 404);

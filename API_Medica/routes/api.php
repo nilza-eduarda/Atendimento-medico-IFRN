@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\VerificarTokenSUAP;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,8 +24,8 @@ Route::get('usuarios', [UserController::class, 'index']);
 
 Route::post('usuarios', [UserController::class, 'store']);
 
-Route::get('usuarios/{cpf}', [UserController::class, 'show']);
+Route::get('usuarios/{cpf}', [UserController::class, 'show'])->middleware(VerificarTokenSUAP::class);
 
-Route::put('usuarios/{cpf}', [UserController::class, 'update']);
+Route::put('usuarios/{cpf}', [UserController::class, 'update'])->middleware(VerificarTokenSUAP::class);
 
-Route::delete('usuarios/{cpf}', [UserController::class, 'destroy']);
+Route::delete('usuarios/{cpf}', [UserController::class, 'destroy'])->middleware(VerificarTokenSUAP::class);

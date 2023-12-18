@@ -2,13 +2,6 @@ openapi: 3.0.0
 info:
   title: Atendimento Médico API
   version: 1.0.0
-servers:
-  - url: http://{host}:{porta}/api
-    variables:
-      host:
-        default: localhost
-      porta:
-        default: '8000'
 
 paths:
   /usuarios:
@@ -23,28 +16,22 @@ paths:
                 - cpf: 000.000.000-01
                   nome: Carlos Sérgio Batalha Filho
                   data_nasc: 01/01/1990
-                  tipo: admin
+                  id: admin
                 - cpf: 000.000.000-02
                   nome: Gabriel Victor de Souza Fernandes
                   data_nasc: 02/02/1995
-                  tipo: comum
+                  id: comum
 
     post:
       summary: Cadastrar usuário
       requestBody:
         content:
           application/json:
-           schema:
-              type: object
-              properties:
-                cpf:
-                  type: string
-                nome:
-                  type: string
-                data_nasc:
-                  type: string
-                tipo:
-                  type: string
+            example:
+              cpf: 000.000.000-03
+              nome: Novo Usuário
+              data_nasc: 03/03/2000
+              id: comum
       responses:
         '201':
           description: Usuário criado com sucesso
@@ -54,6 +41,8 @@ paths:
   /usuarios/{cpf}:
     get:
       summary: Obter dados de um usuário pelo CPF
+      security:
+        - bearer: []
       parameters:
         - in: path
           name: cpf
@@ -69,12 +58,15 @@ paths:
                 cpf: 000.000.000-01
                 nome: Carlos Sérgio Batalha Filho
                 data_nasc: 01/01/1990
-                tipo: admin
+                id: admin
         '404':
           description: Usuário não encontrado
 
     put:
       summary: Alterar dados de um usuário pelo CPF
+      security:
+        - bearer: []
+      
       parameters:
         - in: path
           name: cpf
@@ -84,17 +76,11 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                cpf:
-                  type: string
-                nome:
-                  type: string
-                data_nasc:
-                  type: string
-                tipo:
-                  type: string
+            example:
+              cpf: 000.000.000-01
+              nome: Novo Nome
+              data_nasc: 01/01/1990
+              id: admin
       responses:
         '200':
           description: Dados do usuário alterados com sucesso
@@ -105,6 +91,9 @@ paths:
 
     delete:
       summary: Apagar um usuário pelo CPF
+      security:
+        - bearer: []
+      
       parameters:
         - in: path
           name: cpf
@@ -118,3 +107,10 @@ paths:
           description: Usuário não tem permissão para apagar
         '404':
           description: Usuário não encontrado
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 

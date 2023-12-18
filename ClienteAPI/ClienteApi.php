@@ -1,23 +1,29 @@
 <?php
 
-use GuzzleHttp\Client as GuzzleCliente;
-
 require 'vendor/autoload.php';
+require 'Funcao.php';
+use GuzzleHttp\Client as GuzzleClient;
 
-$cliente_API = new GuzzleCliente ([
-    'base_uri' => "localhost: 8000"
+$cliente_API = new GuzzleClient ([
+    'base_uri' => "localhost:8000"
 ]);
+
+$cabecalho = array(
+    "Content_type" => "application/json",
+    "Authorization" => "Bearer "
+);
 
 
 while (true) {
     echo "---------- Atendimento Medico -----------\n";
     echo "Escolha o que fazer:\n";
-    echo "1 - Listar usuários\n";
-    echo "2 - Cadastrar usuario\n";
-    echo "3 - Listar um usuario\n";
-    echo "4 - Deletar um usuario\n";
-    echo "5 - Editar um usuario\n";
-    echo "6 - Encerrar\n";
+    echo "1 - Login\n";
+    echo "2 - Listar usuários\n";
+    echo "3 - Cadastrar usuario\n";
+    echo "4 - Listar um usuario\n";
+    echo "5 - Deletar um usuario\n";
+    echo "6 - Editar um usuario\n";
+    echo "7 - Encerrar\n";
     $x = readline();//
 
     $array = array(
@@ -27,15 +33,25 @@ while (true) {
         "tipo" => ""
     );
 
-    if ($x == "1") {
-        $resp = enviar_requisicao("$url_api/usuarios");
+    if ($x == "1"){
+        echo "digite sua matricula\n";
+        $matricula = readline();
+        echo "digite sua senha\n";
+        $senha = readline();
+        $token = login($matricula, $senha);
+        $cabecalho["Authorization"] = "Bearer $token";
+
+    }
     
-        if ($resp['codigo'] == 200) {
-            $resp_json = json_decode($resp['corpo'], true);
+    else if ($x == "2") {
+        $resp = $cliente_API->get("/api/usuarios");
+    
+        if ($resp->getStatusCode() == 200) {
+            $resp_json = json_decode($resp->getBody(), true);
     
             if ($resp_json === null) {
                 echo "Erro ao decodificar JSON:\n";
-                var_dump($resp['corpo']);
+                var_dump($resp->getBody());
             } elseif (isset($resp_json['resultado']) && is_array($resp_json['resultado'])) {
                 foreach ($resp_json['resultado'] as $item) {
                     echo $item['nome'] . "- " . $item['cpf'] . "\n";
@@ -48,7 +64,7 @@ while (true) {
             echo "Erro na requisição (código {$resp['codigo']}): " . $resp['corpo'] . "\n";
         }
         
-    }elseif ($x == "2") {
+    }elseif ($x == "3") {
 
         echo "digite seu nome\n";
         $nome = readline();
@@ -64,61 +80,58 @@ while (true) {
         $array['data_nasc'] = $data_nasc;   
         $array['tipo'] = $tipo;   
 
-        $resp = enviar_requisicao("$url_api/usuarios", 
-        metodo: 'POST',
-        corpo: json_encode($array),
-        cabecalhos: ['Content-type:application/json']
-        );
+        $resp = $cliente_API->post("/api/usuarios",[
+            'headers' => $cabecalho,
+            'json' => $array 
+        ]);
+        var_dump($resp->getStatusCode());
     }
 
     
-    elseif($x == 3) { 
+    elseif($x == "4") { 
             echo "digite o cpf: \n";
             $cpf = readline();
 
-            $resp = $cliente_API->get("$url_api/usuarios/{$cpf}", [
-                'headers' => ['Authorization' => "Bearer $this->suap_token"],
-                'json' => $form
+            $resp = $cliente_API->get("/api/usuarios/{$cpf}", [
+                'headers' => $cabecalho
             ]);
 
-            if($resp['codigo'] == "200"){
+            if($resp->getStatusCode() == "200"){
                 $resp_json = json_decode($resp->getBody(), true);
             
                 foreach($resp_json['resultado'] as $key => $value){
                     echo $key."- ". $value."\n";
                 }
-            }elseif($resp['codigo'] == "404"){
+            }elseif($resp->getStatusCode() == "404"){
                 echo "USUARIO NAO ENCONTRADO\n";
             }
             
 
     }
           
-    elseif($x == 4){
+    elseif($x == "5"){
         echo "---- DELETAR UM USUÁRIO ----\n";
         echo "digite o cpf: \n";
         $cpf = readline();
-        $resp = $cliente_API->delete("$url_api/usuarios/{$cpf}", [
-            'headers' => ['Authorization' => "Bearer $this->suap_token"],
-            'json' => $form
+        $resp = $cliente_API->get("api/usuarios/{$cpf}", [
+            'headers' => $cabecalho
         ]);
 
-        if($resp['codigo'] == "200"){
-        $resp = enviar_requisicao("$url_api/usuarios/{$cpf}", metodo:"DELETE");
+        if($resp->getStatusCode() == "200"){
+        $resp = $cliente_API->delete("api/usuarios/{$cpf}");
         echo  "Usuário apagado\n";
         }
         else {echo "Usuário não existe\n";}
 
-    }elseif($x == 5){
+    }elseif($x == "6"){
         
         echo "digite seu cpf\n";
         $cpfid = readline();
-        $resp = $cliente_API->put("$url_api/usuarios/{$cpf}", [
-            'headers' => ['Authorization' => "Bearer $this->suap_token"],
-            'json' => $form
+        $resp = $cliente_API->get("api/usuarios/{$cpfid}", [
+            'headers' => $cabecalho
         ]);
 
-        if($resp['codigo'] == "200"){
+        if($resp->getStatusCode() == "200"){
             echo "digite seu nome\n";
             $nome = readline();
             echo "digite seu cpf\n";
@@ -133,9 +146,9 @@ while (true) {
             $array['data_nasc'] = $data_nasc;   
             $array['tipo'] = $tipo;   
             
-            $resp = $cliente_API->put("$url_api/usuarios/{$cpf}", [
-                'headers' => ['Authorization' => "Bearer $this->suap_token"],
-                'json' => $form
+            $resp = $cliente_API->put("api/usuarios/{$cpfid}", [
+                'headers' => $cabecalho,
+                'json' => $array
             ]);
             
             echo "Usuário Editado com sucesso!!\n";
@@ -151,6 +164,8 @@ while (true) {
         return false;
     }
 
+
     
     
 }
+
