@@ -24,6 +24,9 @@ paths:
 
     post:
       summary: Cadastrar usuário
+      security:
+        - bearer: []
+      
       requestBody:
         content:
           application/json:

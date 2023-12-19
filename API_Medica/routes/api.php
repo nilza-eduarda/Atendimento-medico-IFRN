@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('usuarios', [UserController::class, 'index']);
 
-Route::post('usuarios', [UserController::class, 'store']);
+Route::post('usuarios', [UserController::class, 'store'])->middleware(VerificarTokenSUAP::class);
 
 Route::get('usuarios/{cpf}', [UserController::class, 'show'])->middleware(VerificarTokenSUAP::class);
 

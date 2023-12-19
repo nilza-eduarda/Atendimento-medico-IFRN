@@ -34,16 +34,20 @@ while (true) {
     );
 
     if ($x == "1"){
+        echo"---- LOGAR ----\n";
         echo "digite sua matricula\n";
         $matricula = readline();
         echo "digite sua senha\n";
         $senha = readline();
         $token = login($matricula, $senha);
         $cabecalho["Authorization"] = "Bearer $token";
+        echo "Logado!\n";
 
     }
     
     else if ($x == "2") {
+        
+        echo"---- LISTAR USUÁRIOS ----\n";
         $resp = $cliente_API->get("/api/usuarios");
     
         if ($resp->getStatusCode() == 200) {
@@ -65,7 +69,8 @@ while (true) {
         }
         
     }elseif ($x == "3") {
-
+        
+        echo"---- CADASTRAR USUÁRIO ----\n";
         echo "digite seu nome\n";
         $nome = readline();
         echo "digite seu cpf\n";
@@ -84,11 +89,13 @@ while (true) {
             'headers' => $cabecalho,
             'json' => $array 
         ]);
-        var_dump($resp->getStatusCode());
+        echo "Cadastrado!\n";
     }
 
     
     elseif($x == "4") { 
+            
+            echo"---- LISTAR UM USUÁRIO ----\n";
             echo "digite o cpf: \n";
             $cpf = readline();
 
@@ -98,12 +105,12 @@ while (true) {
 
             if($resp->getStatusCode() == "200"){
                 $resp_json = json_decode($resp->getBody(), true);
-            
+                echo "---- USUÁRIO ----\n";
                 foreach($resp_json['resultado'] as $key => $value){
                     echo $key."- ". $value."\n";
                 }
             }elseif($resp->getStatusCode() == "404"){
-                echo "USUARIO NAO ENCONTRADO\n";
+                echo "Usuário não encontrado\n";
             }
             
 
@@ -118,13 +125,16 @@ while (true) {
         ]);
 
         if($resp->getStatusCode() == "200"){
-        $resp = $cliente_API->delete("api/usuarios/{$cpf}");
-        echo  "Usuário apagado\n";
+        $resp = $cliente_API->delete("api/usuarios/{$cpf}", [
+            'headers' => $cabecalho
+        ]);
+        echo  "Apagado!\n";
         }
         else {echo "Usuário não existe\n";}
 
     }elseif($x == "6"){
         
+        echo"---- EDITAR UM USUÁRIO ----\n";
         echo "digite seu cpf\n";
         $cpfid = readline();
         $resp = $cliente_API->get("api/usuarios/{$cpfid}", [
@@ -151,7 +161,7 @@ while (true) {
                 'json' => $array
             ]);
             
-            echo "Usuário Editado com sucesso!!\n";
+            echo "Editado!\n";
         }else{
             echo"Usuário não existe\n";
         }
